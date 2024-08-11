@@ -1,0 +1,97 @@
+# SERVICE
+spring.application.name=auth-service
+server.port=8000
+frontend.base-url=http://localhost:7000
+
+# HTTPS
+#server.ssl.key-store=classpath:keystore.p12
+#server.ssl.key-store-password=password
+#server.ssl.key-store-type=PKCS12
+#server.ssl.key-alias=tomcat
+
+# SPRING JPA
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
+# POSTGRES
+spring.datasource.url=jdbc:postgresql://localhost:5432/auth_db
+spring.datasource.username=postgres
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# REDIS
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+
+# RABBITMQ
+spring.cloud.stream.rabbit.binder.addresses=localhost:5672
+spring.cloud.stream.rabbit.binder.username=guest
+spring.cloud.stream.rabbit.binder.password=guest
+spring.cloud.stream.rabbit.binder.configuration.connectionTimeout=5000
+spring.cloud.stream.rabbit.binder.configuration.requestTimeout=5000
+spring.cloud.stream.rabbit.binder.configuration.retry.maxAttempts=3
+spring.cloud.stream.rabbit.binder.configuration.retry.initialInterval=1000
+spring.cloud.stream.rabbit.binder.configuration.retry.maxInterval=5000
+
+# RABBITMQ QUEUE
+spring.cloud.stream.bindings.sendUserRequest-out-0.destination=user-request-queue
+spring.cloud.stream.bindings.processUserResponse-in-0.destination=user-response-queue
+
+# JWT
+jwt.secret.access=secret
+jwt.secret.refresh=secret
+jwt.access.expire.minutes=10
+jwt.refresh.expire.days=10
+
+# TWILIO
+twilio.accountSid=sid
+twilio.authToken=authtoken
+twilio.verifyServiceSid=vsid
+twilio.phoneNumber=fromPhoneNumber
+
+# SMTP
+spring.mail.protocol=smtp
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=www.example@gmail.com
+spring.mail.password=aaaa bbbb cccc dddd
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.debug=true
+spring.mail.properties.mail.smtp.connectiontimeout=5000
+spring.mail.properties.mail.smtp.timeout=5000
+spring.mail.properties.mail.smtp.writetimeout=5000
+
+# OAUTH 2 GOOGLE
+spring.security.oauth2.client.registration.google.client-id=
+spring.security.oauth2.client.registration.google.client-secret=
+spring.security.oauth2.client.registration.google.scope=openid, profile, email
+spring.security.oauth2.client.registration.google.redirect-uri=${frontend.base-url}/oauth/google/redirect
+spring.security.oauth2.client.registration.google.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth
+spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+spring.security.oauth2.client.provider.google.jwk-set-uri=https://www.googleapis.com/oauth2/v3/certs
+
+# OAUTH 2 FACEBOOK
+spring.security.oauth2.client.registration.facebook.client-id=
+spring.security.oauth2.client.registration.facebook.client-secret=
+spring.security.oauth2.client.registration.facebook.scope=public_profile, email
+spring.security.oauth2.client.registration.facebook.redirect-uri=${frontend.base-url}/oauth/facebook/redirect
+spring.security.oauth2.client.registration.facebook.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.facebook.authorization-uri=https://www.facebook.com/v20.0/dialog/oauth
+spring.security.oauth2.client.provider.facebook.token-uri=https://graph.facebook.com/v20.0/oauth/access_token
+spring.security.oauth2.client.provider.facebook.user-info-uri=https://graph.facebook.com/me?fields=id,name,email
+spring.security.oauth2.client.provider.facebook.user-name-attribute=id
+
+# OAUTH 2 YANDEX
+spring.security.oauth2.client.registration.yandex.client-id=
+spring.security.oauth2.client.registration.yandex.client-secret=
+spring.security.oauth2.client.registration.yandex.redirect-uri=${frontend.base-url}/oauth/yandex/redirect
+spring.security.oauth2.client.registration.yandex.authorization-grant-type=authorization_code
+spring.security.oauth2.client.provider.yandex.authorization-uri=https://oauth.yandex.com/authorize
+spring.security.oauth2.client.provider.yandex.token-uri=https://oauth.yandex.com/token
+spring.security.oauth2.client.provider.yandex.user-info-uri=https://login.yandex.ru/info
+spring.security.oauth2.client.provider.yandex.jwk-set-uri=https://login.yandex.ru/keys
