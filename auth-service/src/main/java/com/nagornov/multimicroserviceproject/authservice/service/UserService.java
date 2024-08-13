@@ -5,11 +5,12 @@ import com.nagornov.multimicroserviceproject.authservice.dto.auth.AuthResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.LoginFormRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.registration.RegFormRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.registration.RegVerifyRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.user.response.UserResponse;
-import com.nagornov.multimicroserviceproject.authservice.exception.GetUserException;
-import com.nagornov.multimicroserviceproject.authservice.exception.IncorrectVerificationCodeException;
-import com.nagornov.multimicroserviceproject.authservice.exception.SaveUserException;
-import com.nagornov.multimicroserviceproject.authservice.exception.UserAlreadyExistsException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.GetUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.UserNotFoundException;
+import com.nagornov.multimicroserviceproject.authservice.exception.validation.IncorrectPasswordException;
+import com.nagornov.multimicroserviceproject.authservice.exception.validation.IncorrectVerificationCodeException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.SaveUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.UserAlreadyExistsException;
 import com.nagornov.multimicroserviceproject.authservice.mapper.UserMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.util.CodeUtils;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,12 +26,12 @@ import java.util.UUID;
 public class UserService {
 
     private final RedisService redisService;
-    private final UserProfileService userProfileService;
     private final UserMapper userMapper;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final SmtpService smtpService;
     private final TwilioService twilioService;
+    private final UserSenderService userSenderService;
 
 
     public AuthResponse register(RegFormRequest req)
@@ -41,18 +43,18 @@ public class UserService {
         user.setVerificationCode(randomCodeInt6);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        UserResponse checkUserExists = userProfileService.getUser(user);
+        Optional<User> checkUserExists = userSenderService.getUser(user);
 
-        if (checkUserExists != null) {
+        if (checkUserExists.isPresent()) {
             throw new UserAlreadyExistsException();
         }
 
-        if (!user.getPhoneNumber().isEmpty()) {
+        if (user.getPhoneNumber() != null) {
             twilioService.sendSms(
                     user.getPhoneNumber(),
                     "Your verification code for registration: " + randomCodeInt6
             );
-        } else if (!user.getEmail().isEmpty()) {
+        } else if (user.getEmail() != null) {
             smtpService.sendEmail(
                     user.getEmail(),
                     "Verification code",
@@ -60,11 +62,14 @@ public class UserService {
             );
         }
         redisService.saveUser(user, 3);
-        return new AuthResponse(userMapper.toUserResponse(user), jwtService.getAccessToken(user));
+        return new AuthResponse(
+                userMapper.toUserResponse(user),
+                jwtService.getAccessToken(user)
+        );
     }
 
     public AuthResponse verifyRegister(RegVerifyRequest req, JwtAuthentication authInfo)
-            throws GetUserException, IncorrectVerificationCodeException {
+            throws GetUserException, IncorrectVerificationCodeException, UserAlreadyExistsException {
 
         User userFromRedis = redisService.getUser(authInfo.getUserId());
 
@@ -72,20 +77,33 @@ public class UserService {
             throw new IncorrectVerificationCodeException();
         }
 
-        UserResponse userResponse = userProfileService.createUser(userFromRedis);
-        User userFromService = userMapper.toUser(userResponse);
+        Optional<User> createdUser = userSenderService.createUser(userFromRedis);
+        if (createdUser.isEmpty()) {
+            throw new UserAlreadyExistsException();
+        }
 
         return new AuthResponse(
-            userResponse, jwtService.getAuthTokens(userFromService)
+            userMapper.toUserResponse(createdUser.get()),
+            jwtService.getAuthTokens(createdUser.get())
         );
     }
 
-    public AuthResponse login(LoginFormRequest req) {
+    public AuthResponse login(LoginFormRequest req) throws UserNotFoundException, IncorrectPasswordException {
+
         User user = userMapper.toUser(req);
-        UserResponse userFromService = userProfileService.verifyUser(user);
+        Optional<User> userFromService = userSenderService.getUser(user);
+
+        if (userFromService.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        if (!passwordEncoder.matches(user.getPassword(), userFromService.get().getPassword())) {
+            throw new IncorrectPasswordException();
+        }
 
         return new AuthResponse(
-                userFromService, jwtService.getAuthTokens(userMapper.toUser(userFromService))
+                userMapper.toUserResponse(userFromService.get()),
+                jwtService.getAuthTokens(userFromService.get())
         );
     }
 

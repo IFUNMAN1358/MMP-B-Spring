@@ -31,7 +31,7 @@ public class User {
     @Column(name = "username", length = 50, nullable = false, unique = true)
     private String username;
 
-    @Column(name = "phone_number", length = 20)
+    @Column(name = "phone_number", unique = true, length = 20)
     private String phoneNumber;
 
     @Column(name = "email", unique = true)
@@ -77,6 +77,15 @@ public class User {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
+        if (this.phoneNumber != null && this.email != null) {
+            this.isPhoneVerified = true;
+            this.isEmailVerified = true;
+        } else if (this.phoneNumber != null) {
+            this.isPhoneVerified = true;
+        } else if (this.email != null) {
+            this.isEmailVerified = true;
+        }
     }
 
     @PreUpdate

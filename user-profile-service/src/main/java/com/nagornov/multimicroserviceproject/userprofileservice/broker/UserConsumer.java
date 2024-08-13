@@ -1,14 +1,13 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.broker;
 
 import com.nagornov.multimicroserviceproject.userprofileservice.model.User;
-import com.nagornov.multimicroserviceproject.userprofileservice.rabbit.UserConsumerService;
+import com.nagornov.multimicroserviceproject.userprofileservice.service.UserConsumerService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 @Service

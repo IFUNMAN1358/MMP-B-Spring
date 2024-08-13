@@ -1,4 +1,4 @@
-package com.nagornov.multimicroserviceproject.authservice.rabbit;
+package com.nagornov.multimicroserviceproject.authservice.service;
 
 import com.nagornov.multimicroserviceproject.authservice.broker.UserSender;
 import com.nagornov.multimicroserviceproject.authservice.model.User;

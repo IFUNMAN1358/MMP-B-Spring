@@ -1,7 +1,6 @@
-package com.nagornov.multimicroserviceproject.userprofileservice.rabbit;
+package com.nagornov.multimicroserviceproject.userprofileservice.service;
 
 import com.nagornov.multimicroserviceproject.userprofileservice.model.User;
-import com.nagornov.multimicroserviceproject.userprofileservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +21,17 @@ public class UserConsumerService {
     }
 
     private User getUser(User user) {
-        return userService.getUser(user);
+        try {
+            return userService.getUser(user);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private User createUser(User user) {
         try {
             userService.createUser(user);
-            return user;
+            return userService.getUser(user);
         } catch (Exception e) {
             return null;
         }

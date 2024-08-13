@@ -6,7 +6,6 @@ import com.nagornov.multimicroserviceproject.authservice.dto.session.UpdateSessi
 import com.nagornov.multimicroserviceproject.authservice.dto.session.CreateSessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.WsSessionDto;
 import com.nagornov.multimicroserviceproject.authservice.mapper.SessionMapper;
-import com.nagornov.multimicroserviceproject.authservice.mapper.UserMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.repository.JwtRepository;
@@ -25,11 +24,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SessionService {
 
+    private final UserSenderService userSenderService;
     private final SessionRepository sessionRepository;
     private final JwtRepository jwtRepository;
-    private final UserProfileService userProfileService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final UserMapper userMapper;
     private final SessionMapper sessionMapper;
 
     @Transactional
@@ -64,9 +62,9 @@ public class SessionService {
 
             User user = new User();
             user.setUserId(session.getUserId());
-            User userFromService = userMapper.toUser(userProfileService.getUser(user));
+            Optional<User> userFromService = userSenderService.getUser(user);
 
-            String accessToken = jwtRepository.generateAccessToken(userFromService);
+            String accessToken = jwtRepository.generateAccessToken(userFromService.get());
             session.setAccessToken(accessToken);
             sessionRepository.save(session);
 

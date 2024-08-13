@@ -1,6 +1,6 @@
 package com.nagornov.multimicroserviceproject.authservice.handler;
 
-import com.nagornov.multimicroserviceproject.authservice.exception.CustomValidationException;
+import com.nagornov.multimicroserviceproject.authservice.exception.validation.CustomValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

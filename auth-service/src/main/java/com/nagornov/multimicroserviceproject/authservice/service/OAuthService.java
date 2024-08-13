@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.AuthResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.OAuthTokenResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.OAuthUserInfoResponse;
-import com.nagornov.multimicroserviceproject.authservice.dto.user.response.UserResponse;
 import com.nagornov.multimicroserviceproject.authservice.mapper.UserMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.util.CodeUtils;
@@ -22,7 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OAuthService {
 
-    private final UserProfileService userProfileService;
+    private final UserSenderService userSenderService;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final UserMapper userMapper;
@@ -66,21 +65,21 @@ public class OAuthService {
         User user = userMapper.toUser(userInfo);
         user.setPassword(passwordEncoder.encode(CodeUtils.generateRandomCodeDigitChars(6, 6)));
 
-        Optional<UserResponse> fndUserResponse = userProfileService.findUser(user);
+        Optional<User> userFromService = userSenderService.getUser(user);
 
         AuthResponse data = new AuthResponse();
 
-        if (fndUserResponse.isPresent()) {
-            User fndUser = userMapper.toUser(fndUserResponse.get());
+        if (userFromService.isPresent()) {
+            User svUser = userFromService.get();
 
-            data.setUser(fndUserResponse.get());
-            data.setTokens(jwtService.getAuthTokens(fndUser));
+            data.setUser(userMapper.toUserResponse(svUser));
+            data.setTokens(jwtService.getAuthTokens(svUser));
         } else {
-            UserResponse crtUserResponse = userProfileService.createUser(user);
-            User crtUser = userMapper.toUser(crtUserResponse);
+            Optional<User> createdUser = userSenderService.createUser(user);
+            User crUser = createdUser.get();
 
-            data.setUser(crtUserResponse);
-            data.setTokens(jwtService.getAuthTokens(crtUser));
+            data.setUser(userMapper.toUserResponse(crUser));
+            data.setTokens(jwtService.getAuthTokens(crUser));
         }
         return data;
     }

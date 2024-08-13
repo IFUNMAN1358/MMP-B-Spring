@@ -4,12 +4,11 @@ import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.Jwt
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.AuthResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.registration.RegFormRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.registration.RegVerifyRequest;
-import com.nagornov.multimicroserviceproject.authservice.exception.GetUserException;
-import com.nagornov.multimicroserviceproject.authservice.exception.IncorrectVerificationCodeException;
-import com.nagornov.multimicroserviceproject.authservice.exception.SaveUserException;
-import com.nagornov.multimicroserviceproject.authservice.exception.UserAlreadyExistsException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.GetUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.validation.IncorrectVerificationCodeException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.SaveUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.UserAlreadyExistsException;
 import com.nagornov.multimicroserviceproject.authservice.service.*;
-import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,17 +25,14 @@ public class RegistrationController {
     private final UserService userService;
     private final JwtService jwtService;
 
-
     @PostMapping("/api/registration")
     public ResponseEntity<?> registration(@Valid @RequestBody RegFormRequest request, BindingResult result) {
         try {
             exceptionService.fieldsValidation(result);
+
             AuthResponse data = userService.register(request);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(data);
-        }
-        catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.contentUTF8());
         }
         catch (UserAlreadyExistsException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User already exists");
@@ -46,7 +42,6 @@ public class RegistrationController {
         }
     }
 
-
     @PostMapping("/api/registration/verify")
     public ResponseEntity<?> verifyRegistration(@RequestBody RegVerifyRequest request) {
         try {
@@ -55,8 +50,8 @@ public class RegistrationController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(data);
         }
-        catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.contentUTF8());
+        catch (UserAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User already exists");
         }
         catch (GetUserException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Redis get user error");

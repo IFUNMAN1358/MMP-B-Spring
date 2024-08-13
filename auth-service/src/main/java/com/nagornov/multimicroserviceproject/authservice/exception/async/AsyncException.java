@@ -1,4 +1,4 @@
-package com.nagornov.multimicroserviceproject.authservice.exception;
+package com.nagornov.multimicroserviceproject.authservice.exception.async;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

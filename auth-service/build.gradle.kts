@@ -37,7 +37,6 @@ dependencies {
     implementation("org.springframework.security:spring-security-oauth2-client")
 
     implementation("org.springframework.cloud:spring-cloud-stream")
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-starter-stream-rabbit")
 
     //

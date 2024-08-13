@@ -6,7 +6,6 @@ import com.nagornov.multimicroserviceproject.authservice.dto.auth.OAuthTokenResp
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.OAuthUserInfoResponse;
 import com.nagornov.multimicroserviceproject.authservice.config.properties.OAuthProvider;
 import com.nagornov.multimicroserviceproject.authservice.service.OAuthService;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,9 +41,6 @@ public class OAuthController {
             AuthResponse data = oAuthService.userAuth(userInfo);
 
             return ResponseEntity.status(HttpStatus.OK).body(data);
-        }
-        catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.contentUTF8());
         }
         catch (JsonProcessingException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("OAuth DTO JSON parsing error");

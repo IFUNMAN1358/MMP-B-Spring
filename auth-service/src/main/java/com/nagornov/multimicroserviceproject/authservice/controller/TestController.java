@@ -1,7 +1,7 @@
 package com.nagornov.multimicroserviceproject.authservice.controller;
 
 import com.nagornov.multimicroserviceproject.authservice.model.User;
-import com.nagornov.multimicroserviceproject.authservice.rabbit.UserSenderService;
+import com.nagornov.multimicroserviceproject.authservice.service.UserSenderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

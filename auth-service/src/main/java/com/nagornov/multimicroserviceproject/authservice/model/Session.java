@@ -22,7 +22,7 @@ public class Session {
     @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
 
-    @Column(name = "access_token", nullable = false)
+    @Column(name = "access_token", length = 400, nullable = false)
     private String accessToken;
 
     @Column(name = "refresh_token", nullable = false, updatable = false)

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.nagornov.multimicroserviceproject.authservice.config.security.GrantedAuthorityDeserializer;
+import jakarta.persistence.PrePersist;
 import lombok.*;
 
 import java.util.*;

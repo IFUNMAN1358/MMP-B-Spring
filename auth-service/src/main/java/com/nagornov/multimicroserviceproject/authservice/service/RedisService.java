@@ -1,7 +1,7 @@
 package com.nagornov.multimicroserviceproject.authservice.service;
 
-import com.nagornov.multimicroserviceproject.authservice.exception.GetUserException;
-import com.nagornov.multimicroserviceproject.authservice.exception.SaveUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.GetUserException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.SaveUserException;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.repository.RedisRepository;
 import lombok.AllArgsConstructor;

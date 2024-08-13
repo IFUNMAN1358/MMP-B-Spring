@@ -43,9 +43,9 @@ public class RegFormRequest {
         return password != null && password.equals(confirmPassword);
     }
 
-    @AssertTrue(message = "Phone number or email is required")
+    @AssertFalse(message = "Phone number or email is required")
     public boolean isPhoneAndEmail() {
-        return (!phoneNumber.isEmpty() || !email.isEmpty());
+        return (phoneNumber != null && email != null);
     }
 
 }

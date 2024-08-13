@@ -31,13 +31,6 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
 
-                .requestMatchers(
-                        "/api/find-user",
-                        "/api/get-user",
-                        "/api/verify-user",
-                        "/api/create-user"
-                ).permitAll()
-
                 .anyRequest().authenticated()
             );
         return http.build();

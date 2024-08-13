@@ -2,8 +2,9 @@ package com.nagornov.multimicroserviceproject.authservice.controller;
 
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.AuthResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.auth.LoginFormRequest;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.UserNotFoundException;
+import com.nagornov.multimicroserviceproject.authservice.exception.validation.IncorrectPasswordException;
 import com.nagornov.multimicroserviceproject.authservice.service.UserService;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,12 @@ public class LoginController {
     public ResponseEntity<?> login(@RequestBody LoginFormRequest request) {
         try {
             AuthResponse data = userService.login(request);
-
             return ResponseEntity.status(HttpStatus.OK).body(data);
-        } catch (FeignException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.contentUTF8());
+
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found");
+        } catch (IncorrectPasswordException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password mismatch");
         }
     }
 
