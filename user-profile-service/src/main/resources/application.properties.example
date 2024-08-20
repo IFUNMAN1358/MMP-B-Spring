@@ -1,7 +1,8 @@
 # SERVICE
+service.name=UserProfileService
 spring.application.name=user-profile-service
 server.port=8010
-frontend.base-url=http://localhost:7010
+frontend.base-url=http://user.localhost:7010
 
 # HTTPS
 #server.ssl.key-store=classpath:keystore.p12
@@ -34,3 +35,5 @@ spring.cloud.stream.rabbit.binder.configuration.retry.maxInterval=5000
 # RABBITMQ QUEUE
 spring.cloud.stream.bindings.processUserRequest-in-0.destination=user-request-queue
 spring.cloud.stream.bindings.processUserRequest-out-0.destination=user-response-queue
+
+rabbit.session.queue=session-request-queue

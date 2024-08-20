@@ -30,20 +30,25 @@ public class SessionController {
     }
 
     @GetMapping("/api/session")
-    public ResponseEntity<?> getSessions(@RequestParam String service) {
-        JwtAuthentication authInfo = jwtService.getAuthInfo();
+    public ResponseEntity<?> getSession(@RequestParam String refreshToken) {
+        Session session = sessionService.getSession(refreshToken);
+        return ResponseEntity.status(HttpStatus.OK).body(session);
+    }
 
-        List<Session> data = sessionService.getSessions(service, authInfo.getUserId());
+    @GetMapping("/api/sessions")
+    public ResponseEntity<?> getSessions() {
+        JwtAuthentication authInfo = jwtService.getAuthInfo();
+        List<Session> data = sessionService.getSessions(authInfo.getUserId());
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
     @PostMapping("/api/session/update")
     public ResponseEntity<?> updateSession(@RequestBody UpdateSessionRequest request) {
-        Optional<JwtResponse> tokens = sessionService.updateSession(request);
-        if (tokens.isEmpty()) {
+        Session session = sessionService.updateSession(request);
+        if (session == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Session update error");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(tokens.get());
+        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
     @PostMapping("/api/session/delete")

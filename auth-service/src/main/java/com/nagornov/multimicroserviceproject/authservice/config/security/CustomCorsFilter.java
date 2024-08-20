@@ -23,11 +23,19 @@ public class CustomCorsFilter extends GenericFilterBean {
     @Value("${frontend.base-url}")
     private String frontendBaseUrl;
 
+    @Value("${user-profile-service.backend.url}")
+    private String userProfileServiceBackendUrl;
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        response.setHeader("Access-Control-Allow-Origin", frontendBaseUrl);
+        String origin = request.getHeader("Origin");
+
+        if (frontendBaseUrl.equals(origin) || userProfileServiceBackendUrl.equals(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        }
         response.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,PUT,OPTIONS");
         response.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
         response.setHeader("Access-Control-Allow-Credentials", "true");

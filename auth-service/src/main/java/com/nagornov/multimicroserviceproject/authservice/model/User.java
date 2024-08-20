@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nagornov.multimicroserviceproject.authservice.config.security.GrantedAuthorityDeserializer;
 import jakarta.persistence.PrePersist;
 import lombok.*;
@@ -62,6 +63,7 @@ public class User {
     @Override
     public String toString() {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         try {
             return objectMapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
@@ -71,6 +73,7 @@ public class User {
 
     public static User fromString(String str) {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         try {
             return objectMapper.readValue(str, User.class);
         } catch (JsonProcessingException e) {

@@ -1,7 +1,11 @@
 # SERVICE
+service.name=AuthService
 spring.application.name=auth-service
 server.port=8000
-frontend.base-url=http://localhost:7000
+frontend.base-url=http://auth.localhost:7000
+
+# OTHER SERVICES
+user-profile-service.backend.url=http://localhost:8010
 
 # HTTPS
 #server.ssl.key-store=classpath:keystore.p12
@@ -38,6 +42,8 @@ spring.cloud.stream.rabbit.binder.configuration.retry.maxInterval=5000
 # RABBITMQ QUEUE
 spring.cloud.stream.bindings.sendUserRequest-out-0.destination=user-request-queue
 spring.cloud.stream.bindings.processUserResponse-in-0.destination=user-response-queue
+
+rabbit.session.queue=session-request-queue
 
 # JWT
 jwt.secret.access=secret

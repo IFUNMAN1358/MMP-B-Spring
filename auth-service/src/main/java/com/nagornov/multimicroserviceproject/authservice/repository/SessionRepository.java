@@ -16,7 +16,8 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
     Session getSessionByUserIdAndRefreshToken(UUID userId, String token);
     Session getSessionBySessionIdAndUserId(Long sessionId, UUID userId);
 
-    List<Session> getSessionsByServiceAndUserId(String service, UUID userId);
+    Session getSessionByRefreshToken(String refreshToken);
+    List<Session> getSessionsByUserId(UUID userId);
 
     void deleteSessionByRefreshToken(String token);
 }

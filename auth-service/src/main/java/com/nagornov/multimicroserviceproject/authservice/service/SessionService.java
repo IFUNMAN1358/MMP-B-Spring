@@ -4,7 +4,6 @@ import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.DeleteSessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.UpdateSessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.CreateSessionRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.session.WsSessionDto;
 import com.nagornov.multimicroserviceproject.authservice.mapper.SessionMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
@@ -29,6 +28,7 @@ public class SessionService {
     private final JwtRepository jwtRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final SessionMapper sessionMapper;
+    private final SessionSenderService sessionSenderService;
 
     @Transactional
     public void createSession(CreateSessionRequest req) {
@@ -45,11 +45,11 @@ public class SessionService {
     }
 
     @Transactional
-    public Optional<JwtResponse> updateSession(UpdateSessionRequest req) {
+    public Session updateSession(UpdateSessionRequest req) {
         try {
             if (!jwtRepository.validateRefreshToken(req.getRefreshToken())) {
                 sessionRepository.deleteSessionByRefreshToken(req.getRefreshToken());
-                return Optional.empty();
+                return null;
             }
 
             Claims claims = jwtRepository.getRefreshClaims(req.getRefreshToken());
@@ -57,7 +57,7 @@ public class SessionService {
 
             Session session = sessionRepository.getSessionByUserIdAndRefreshToken(UUID.fromString(userId), req.getRefreshToken());
             if (session == null) {
-                return Optional.empty();
+                return null;
             }
 
             User user = new User();
@@ -68,24 +68,29 @@ public class SessionService {
             session.setAccessToken(accessToken);
             sessionRepository.save(session);
 
-            return Optional.of(new JwtResponse(accessToken, req.getRefreshToken()));
+            return session;
         } catch (Exception e) {
             throw new RuntimeException("Failed to update session", e);
         }
     }
 
-    public List<Session> getSessions(String service, String userId) {
-        return sessionRepository.getSessionsByServiceAndUserId(service, UUID.fromString(userId));
+    public Session getSession(String refreshToken) {
+        return sessionRepository.getSessionByRefreshToken(refreshToken);
+    }
+
+    public List<Session> getSessions(String userId) {
+        return sessionRepository.getSessionsByUserId(UUID.fromString(userId));
     }
 
     @Transactional
     public void deleteSession(DeleteSessionRequest req, String userId) {
         Session session = sessionRepository.getSessionBySessionIdAndUserId(req.getSessionId(), UUID.fromString(userId));
 
-        WsSessionDto sessionInfo = new WsSessionDto();
-        sessionInfo.setRefreshToken(session.getRefreshToken());
-
-        messagingTemplate.convertAndSend("/session", sessionInfo);
+        if (session.getService().equals("AuthService")) {
+            messagingTemplate.convertAndSend("/session", session);
+        } else {
+            sessionSenderService.logout(session.getService(), session);
+        }
         sessionRepository.delete(session);
     }
 

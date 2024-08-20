@@ -40,8 +40,8 @@ public class SecurityConfig {
                     .requestMatchers("/ws/**").permitAll()
 
                     // SESSION
-                    .requestMatchers(HttpMethod.POST, "/api/session").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/session").hasRole("USER")
+                    .requestMatchers("/api/session").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/sessions").hasRole("USER")
                     .requestMatchers("/api/session/update").permitAll()
                     .requestMatchers("/api/session/delete").hasRole("USER")
 
