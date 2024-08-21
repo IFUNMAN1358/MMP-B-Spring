@@ -44,6 +44,7 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/sessions").hasRole("USER")
                     .requestMatchers("/api/session/update").permitAll()
                     .requestMatchers("/api/session/delete").hasRole("USER")
+                    .requestMatchers("/api/session/has-by-access-token").permitAll()
 
                     // AUTH
                     .requestMatchers("/api/auth/login").permitAll()

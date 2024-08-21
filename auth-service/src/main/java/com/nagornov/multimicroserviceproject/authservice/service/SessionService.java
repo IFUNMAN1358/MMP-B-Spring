@@ -1,9 +1,7 @@
 package com.nagornov.multimicroserviceproject.authservice.service;
 
-import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.DeleteSessionRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.session.UpdateSessionRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.session.CreateSessionRequest;
+import com.nagornov.multimicroserviceproject.authservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.mapper.SessionMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
@@ -31,7 +29,7 @@ public class SessionService {
     private final SessionSenderService sessionSenderService;
 
     @Transactional
-    public void createSession(CreateSessionRequest req) {
+    public void createSession(SessionRequest req) {
         try {
             if (sessionRepository.existsByServiceAndUserIdAndDevice(req.getService(), req.getUserId(), req.getDevice())) {
                 Session existingSession = sessionRepository.getSessionByServiceAndUserIdAndDevice(req.getService(), req.getUserId(), req.getDevice());
@@ -45,7 +43,7 @@ public class SessionService {
     }
 
     @Transactional
-    public Session updateSession(UpdateSessionRequest req) {
+    public Session updateSession(SessionRequest req) throws Exception {
         try {
             if (!jwtRepository.validateRefreshToken(req.getRefreshToken())) {
                 sessionRepository.deleteSessionByRefreshToken(req.getRefreshToken());
@@ -57,7 +55,7 @@ public class SessionService {
 
             Session session = sessionRepository.getSessionByUserIdAndRefreshToken(UUID.fromString(userId), req.getRefreshToken());
             if (session == null) {
-                return null;
+                throw new Exception("Session not found");
             }
 
             User user = new User();
@@ -66,11 +64,13 @@ public class SessionService {
 
             String accessToken = jwtRepository.generateAccessToken(userFromService.get());
             session.setAccessToken(accessToken);
+            session.setOs(req.getOs());
+            session.setLocation(req.getLocation());
             sessionRepository.save(session);
 
             return session;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update session", e);
+            throw new Exception("Failed to update session", e);
         }
     }
 

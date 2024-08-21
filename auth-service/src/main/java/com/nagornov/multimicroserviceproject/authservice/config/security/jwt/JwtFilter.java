@@ -37,11 +37,11 @@ public class JwtFilter extends GenericFilterBean {
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        String requestURI = httpRequest.getRequestURI();
+        String requestUri = httpRequest.getRequestURI();
 
         if (token != null && jwtRepository.validateAccessToken(token)) {
 
-            if (!sessionSkippedRequestUri().contains(requestURI)) {
+            if (!sessionSkippedRequestUri().contains(requestUri)) {
                 if (!sessionService.hasByAccessToken(token)) {
                     httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     return;

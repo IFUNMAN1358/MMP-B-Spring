@@ -1,6 +1,6 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.controller;
 
-import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.UpdateSessionRequest;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.Session;
 import com.nagornov.multimicroserviceproject.userprofileservice.service.SessionService;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +25,13 @@ public class SessionController {
     }
 
     @PostMapping("/api/session/update")
-    public ResponseEntity<?> updateSession(@RequestBody UpdateSessionRequest request) {
-        Session session = sessionService.updateSession(request);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Session update error");
+    public ResponseEntity<?> updateSession(@RequestBody SessionRequest request) {
+        try {
+            Session session = sessionService.updateSession(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(session);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating session");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
 }

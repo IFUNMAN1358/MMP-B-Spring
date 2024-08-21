@@ -1,6 +1,6 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.client;
 
-import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.UpdateSessionRequest;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.Session;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +18,9 @@ public interface AuthClient {
     ResponseEntity<Session> getSession(@RequestParam String refreshToken);
 
     @PostMapping("/api/session/update")
-    ResponseEntity<Session> updateSession(@RequestBody UpdateSessionRequest req);
+    ResponseEntity<Session> updateSession(@RequestBody SessionRequest req);
+
+    @GetMapping("/api/session/has-by-access-token")
+    ResponseEntity<Boolean> hasByAccessToken(@RequestParam String accessToken);
 
 }

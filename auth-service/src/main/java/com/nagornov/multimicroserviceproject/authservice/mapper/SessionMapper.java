@@ -1,6 +1,6 @@
 package com.nagornov.multimicroserviceproject.authservice.mapper;
 
-import com.nagornov.multimicroserviceproject.authservice.dto.session.CreateSessionRequest;
+import com.nagornov.multimicroserviceproject.authservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -13,5 +13,5 @@ public interface SessionMapper {
 
     @Mapping(target = "sessionId", ignore = true)
     @Mapping(target = "lastActivity", ignore = true)
-    Session toSession(CreateSessionRequest request);
+    Session toSession(SessionRequest request);
 }

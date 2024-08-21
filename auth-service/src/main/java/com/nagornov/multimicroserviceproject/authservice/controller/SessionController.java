@@ -1,10 +1,8 @@
 package com.nagornov.multimicroserviceproject.authservice.controller;
 
 import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.JwtAuthentication;
-import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtResponse;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.DeleteSessionRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.session.UpdateSessionRequest;
-import com.nagornov.multimicroserviceproject.authservice.dto.session.CreateSessionRequest;
+import com.nagornov.multimicroserviceproject.authservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import com.nagornov.multimicroserviceproject.authservice.service.JwtService;
 import com.nagornov.multimicroserviceproject.authservice.service.SessionService;
@@ -14,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +21,7 @@ public class SessionController {
     private final JwtService jwtService;
 
     @PostMapping("/api/session")
-    public ResponseEntity<?> createSession(@RequestBody CreateSessionRequest request) {
+    public ResponseEntity<?> createSession(@RequestBody SessionRequest request) {
         sessionService.createSession(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("Session has been created");
     }
@@ -42,13 +39,20 @@ public class SessionController {
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 
+    @GetMapping("/api/session/has-by-access-token")
+    public ResponseEntity<?> hasByAccessToken(@RequestParam String accessToken) {
+        Boolean result = sessionService.hasByAccessToken(accessToken);
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
     @PostMapping("/api/session/update")
-    public ResponseEntity<?> updateSession(@RequestBody UpdateSessionRequest request) {
-        Session session = sessionService.updateSession(request);
-        if (session == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Session update error");
+    public ResponseEntity<?> updateSession(@RequestBody SessionRequest request) {
+        try {
+            Session session = sessionService.updateSession(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(session);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating session");
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(session);
     }
 
     @PostMapping("/api/session/delete")

@@ -37,10 +37,10 @@ public class Session {
     @Column(name = "service", nullable = false, updatable = false)
     private String service;
 
-    @Column(name = "os", nullable = false, updatable = false)
+    @Column(name = "os", nullable = false)
     private String os;
 
-    @Column(name = "location", nullable = false, updatable = false)
+    @Column(name = "location", nullable = false)
     private String location;
 
     @Column(name = "last_activity", nullable = false)

@@ -32,6 +32,9 @@ public class SecurityConfig {
             .addFilterBefore(corsFilter, SessionManagementFilter.class)
             .authorizeHttpRequests(auth -> auth
 
+                    // TEST
+                    .requestMatchers("/api/test").hasRole("USER")
+
                     // WEBSOCKET
                     .requestMatchers("/ws/**").permitAll()
 

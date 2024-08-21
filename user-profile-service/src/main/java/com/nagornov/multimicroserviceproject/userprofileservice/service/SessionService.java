@@ -1,7 +1,7 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.service;
 
 import com.nagornov.multimicroserviceproject.userprofileservice.client.AuthClient;
-import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.UpdateSessionRequest;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.session.SessionRequest;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.Session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +20,13 @@ public class SessionService {
         return response.getBody();
     }
 
-    public Session updateSession(UpdateSessionRequest req) {
+    public Session updateSession(SessionRequest req) {
         ResponseEntity<Session> response = authClient.updateSession(req);
+        return response.getBody();
+    }
+
+    public Boolean hasByAccessToken(String accessToken) {
+        ResponseEntity<Boolean> response = authClient.hasByAccessToken(accessToken);
         return response.getBody();
     }
 

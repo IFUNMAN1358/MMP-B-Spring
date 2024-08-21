@@ -35,5 +35,7 @@ spring.cloud.stream.rabbit.binder.configuration.retry.maxInterval=5000
 # RABBITMQ QUEUE
 spring.cloud.stream.bindings.processUserRequest-in-0.destination=user-request-queue
 spring.cloud.stream.bindings.processUserRequest-out-0.destination=user-response-queue
-
 rabbit.session.queue=session-request-queue
+
+# JWT
+jwt.secret.access=copy secret from authorization service

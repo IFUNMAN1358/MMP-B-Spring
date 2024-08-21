@@ -4,7 +4,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class CreateSessionRequest {
+public class SessionRequest {
 
     private UUID userId;
     private String accessToken;

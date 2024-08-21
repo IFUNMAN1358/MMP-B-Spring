@@ -1,7 +1,7 @@
-package com.nagornov.multimicroserviceproject.authservice.util;
+package com.nagornov.multimicroserviceproject.userprofileservice.util;
 
-import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.JwtAuthentication;
-import com.nagornov.multimicroserviceproject.authservice.model.Role;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.jwt.JwtAuthentication;
+import com.nagornov.multimicroserviceproject.userprofileservice.model.Role;
 import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JwtUtil {
