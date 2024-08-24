@@ -35,6 +35,8 @@ public class SecurityConfig {
 
                     // TEST
                     .requestMatchers("/api/test").permitAll()
+                    .requestMatchers("/api/access-test").authenticated()
+                    .requestMatchers("/api/refresh-test").authenticated()
 
                     // WEBSOCKET
                     .requestMatchers("/ws/**").permitAll()

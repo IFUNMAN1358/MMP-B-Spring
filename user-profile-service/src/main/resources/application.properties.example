@@ -22,20 +22,33 @@ spring.datasource.username=postgres
 spring.datasource.password=password
 spring.datasource.driver-class-name=org.postgresql.Driver
 
+################################################################################
 # RABBITMQ
-spring.cloud.stream.rabbit.binder.addresses=localhost:5672
-spring.cloud.stream.rabbit.binder.username=guest
-spring.cloud.stream.rabbit.binder.password=guest
-spring.cloud.stream.rabbit.binder.configuration.connectionTimeout=5000
-spring.cloud.stream.rabbit.binder.configuration.requestTimeout=5000
-spring.cloud.stream.rabbit.binder.configuration.retry.maxAttempts=3
-spring.cloud.stream.rabbit.binder.configuration.retry.initialInterval=1000
-spring.cloud.stream.rabbit.binder.configuration.retry.maxInterval=5000
+# general
+spring.rabbitmq.stream.host=localhost
+spring.rabbitmq.stream.port=5672
+spring.rabbitmq.stream.username=guest
+spring.rabbitmq.stream.password=guest
+spring.rabbitmq.connection-timeout=5000
+spring.rabbitmq.requested-heartbeat=10
+# template
+spring.rabbitmq.template.reply-timeout=5000
+spring.rabbitmq.template.retry.max-attempts=3
+spring.rabbitmq.template.retry.initial-interval=1000
+spring.rabbitmq.template.retry.max-interval=5000
+# listener
+spring.rabbitmq.listener.direct.retry.max-attempts=3
+spring.rabbitmq.listener.direct.retry.initial-interval=1000
+spring.rabbitmq.listener.direct.retry.max-interval=5000
+# queue
+spring.rabbitmq.user.request.queue=user-request-queue
+spring.rabbitmq.user.response.queue=user-response-queue
+spring.rabbitmq.user.exchange=user-exchange
+spring.rabbitmq.user.request.routing-key=user-request-routing-key
+spring.rabbitmq.user.response.routing-key=user-response-routing-key
 
-# RABBITMQ QUEUE
-spring.cloud.stream.bindings.processUserRequest-in-0.destination=user-request-queue
-spring.cloud.stream.bindings.processUserRequest-out-0.destination=user-response-queue
-rabbit.session.queue=session-request-queue
+spring.rabbitmq.session.request.queue=session-request-queue
+################################################################################
 
 # JWT
 jwt.secret.access=copy secret from authorization service

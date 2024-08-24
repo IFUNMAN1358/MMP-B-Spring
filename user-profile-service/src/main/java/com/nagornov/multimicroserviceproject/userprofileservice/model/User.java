@@ -1,11 +1,9 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nagornov.multimicroserviceproject.userprofileservice.config.security.GrantedAuthorityDeserializer;
+import com.nagornov.multimicroserviceproject.userprofileservice.util.JsonUtils;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -99,23 +97,11 @@ public class User {
 
     @Override
     public String toString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting User to JSON string", e);
-        }
+        return JsonUtils.toJsonString(this);
     }
 
     public static User fromString(String str) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        try {
-            return objectMapper.readValue(str, User.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting JSON string to User", e);
-        }
+        return JsonUtils.fromJsonString(str, User.class);
     }
 
 }

@@ -9,8 +9,10 @@ import java.util.UUID;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long> {
+
     Boolean existsByServiceAndUserIdAndDevice(String service, UUID userId, String device);
     Boolean existsByAccessToken(String token);
+    Boolean existsByRefreshToken(String token);
 
     Session getSessionByServiceAndUserIdAndDevice(String service, UUID userId, String device);
     Session getSessionByUserIdAndRefreshToken(UUID userId, String token);

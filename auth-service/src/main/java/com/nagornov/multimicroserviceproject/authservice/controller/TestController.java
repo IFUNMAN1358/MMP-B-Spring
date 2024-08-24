@@ -1,31 +1,33 @@
 package com.nagornov.multimicroserviceproject.authservice.controller;
 
-import com.nagornov.multimicroserviceproject.authservice.model.User;
-import com.nagornov.multimicroserviceproject.authservice.service.UserSenderService;
+import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.JwtAuthentication;
+import com.nagornov.multimicroserviceproject.authservice.service.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequiredArgsConstructor
 public class TestController {
 
-    private final UserSenderService userSenderService;
+    private final JwtService jwtService;
 
-    @PostMapping("/api/test")
-    public ResponseEntity<?> test(@RequestParam String mail) {
+    @GetMapping("/api/test")
+    public ResponseEntity<?> Test() {
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
+    }
 
-        User user = new User();
-        user.setEmail(mail);
+    @GetMapping("/api/access-test")
+    public ResponseEntity<?> accessTest() {
+        JwtAuthentication authInfo = jwtService.getAuthInfo();
+        return ResponseEntity.status(HttpStatus.OK).body(authInfo);
+    }
 
-        Optional<User> optU = userSenderService.getUser(user);
-        if (optU.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("User not found");
-        }
-        return ResponseEntity.ok(optU.get());
+    @GetMapping("/api/refresh-test")
+    public ResponseEntity<?> refreshTest() {
+        JwtAuthentication authInfo = jwtService.getAuthInfo();
+        return ResponseEntity.status(HttpStatus.OK).body(authInfo);
     }
 
 }

@@ -1,51 +1,88 @@
 package com.nagornov.multimicroserviceproject.authservice.config;
 
-import org.springframework.amqp.core.AcknowledgeMode;
+import com.nagornov.multimicroserviceproject.authservice.config.properties.RabbitProperties;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class RabbitConfig {
 
-    @Value("${spring.cloud.stream.rabbit.binder.addresses}")
-    private String rabbitAddress;
+    private final RabbitProperties rabbitProperties;
 
-    @Value("${rabbit.session.queue}")
-    private String sessionQueue;
-
-    @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory() {
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory());
-        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
-        return factory;
-    }
-
-    @Bean
-    public Queue sessionQueue() {
-        return new Queue(sessionQueue, true);
-    }
+    //
+    // General
+    //
 
     @Bean
     public CachingConnectionFactory connectionFactory() {
-        String[] addressParts = rabbitAddress.split(":");
-        String host = addressParts[0];
-        int port = addressParts.length > 1 ? Integer.parseInt(addressParts[1]) : 5672;
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setHost(rabbitProperties.getHost());
+        connectionFactory.setPort(rabbitProperties.getPort());
+        connectionFactory.setUsername(rabbitProperties.getUsername());
+        connectionFactory.setPassword(rabbitProperties.getPassword());
+        connectionFactory.setConnectionTimeout(rabbitProperties.getConnectionTimeout());
+        connectionFactory.setRequestedHeartBeat(rabbitProperties.getRequestedHeartbeat());
+        return connectionFactory;
+    }
 
-        CachingConnectionFactory factory = new CachingConnectionFactory(host);
-        factory.setPort(port);
+    //
+    // User
+    //
 
-        return factory;
+    @Bean
+    public Queue userRequestQueue() { return new Queue(rabbitProperties.getUserRequestQueue(), true); }
+
+    @Bean
+    public Queue userResponseQueue() { return new Queue(rabbitProperties.getUserResponseQueue(), true); }
+
+    @Bean
+    public TopicExchange userExchange() { return new TopicExchange(rabbitProperties.getUserExchange()); }
+
+    @Bean
+    public Binding userRequestBinding() {
+        return BindingBuilder.bind(userRequestQueue()).to(userExchange()).with(rabbitProperties.getUserRequestRoutingKey());
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate() {
-        return new RabbitTemplate(connectionFactory());
+    public Binding userResponseBinding() {
+        return BindingBuilder.bind(userResponseQueue()).to(userExchange()).with(rabbitProperties.getUserResponseRoutingKey());
+    }
+
+    @Bean
+    @Qualifier("userRabbitTemplate")
+    public RabbitTemplate userRabbitTemplate() {
+        RabbitTemplate template = new RabbitTemplate();
+        template.setConnectionFactory(connectionFactory());
+        template.setExchange(rabbitProperties.getUserExchange());
+        template.setRoutingKey(rabbitProperties.getUserRequestRoutingKey());
+        template.setReplyTimeout(rabbitProperties.getTemplateReplyTimeout());
+        return template;
+    }
+
+    //
+    // Session
+    //
+
+    @Bean
+    public Queue sessionRequestQueue() {
+        return new Queue(rabbitProperties.getSessionRequestQueue(), true);
+    }
+
+    @Bean
+    @Qualifier("sessionRabbitTemplate")
+    public RabbitTemplate sessionRabbitTemplate() {
+        RabbitTemplate template = new RabbitTemplate();
+        template.setConnectionFactory(connectionFactory());
+        return template;
     }
 
 }

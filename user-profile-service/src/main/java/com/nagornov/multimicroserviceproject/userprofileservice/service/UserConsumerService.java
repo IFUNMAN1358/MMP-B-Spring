@@ -1,5 +1,6 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.service;
 
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.rabbit.UserMessage;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,10 +11,10 @@ public class UserConsumerService {
 
     private final UserService userService;
 
-    public User distributor(String user, String operation) {
-        User u = User.fromString(user);
+    public User distributor(UserMessage message) {
+        User u = message.getUser();
 
-        return switch (operation) {
+        return switch (message.getOperation()) {
             case "getUser" -> getUser(u);
             case "createUser" -> createUser(u);
             default -> null;

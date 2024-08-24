@@ -1,5 +1,7 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.broker;
 
+import com.nagornov.multimicroserviceproject.userprofileservice.config.properties.RabbitProperties;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.rabbit.SessionMessage;
 import com.nagornov.multimicroserviceproject.userprofileservice.service.SessionConsumerService;
 import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
@@ -8,27 +10,26 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.amqp.core.Message;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+
 @Service
 @RequiredArgsConstructor
 public class SessionConsumer {
 
     private final SessionConsumerService sessionConsumerService;
+    private final RabbitProperties rabbitProperties;
 
     @Value("${service.name}")
     private String service;
 
-    @RabbitListener(queues = "${rabbit.session.queue}")
-    public void processSessionRequest(Message message, Channel channel) throws Exception {
+    @RabbitListener(queues = "#{rabbitProperties.getSessionRequestQueue()}")
+    public void receiveMessage(Message message, Channel channel) throws Exception {
 
-        String payload = new String(message.getBody());
-        String[] parts = payload.split(":", 3);
+        String messageBody = new String(message.getBody(), StandardCharsets.UTF_8);
+        SessionMessage sessionMessage = SessionMessage.fromString(messageBody);
 
-        String service = parts[0];
-        String operation = parts[1];
-        String session = parts[2];
-
-        if (this.service.equals(service)) {
-            sessionConsumerService.distributor(session, operation);
+        if (this.service.equals(sessionMessage.getService())) {
+            sessionConsumerService.distributor(sessionMessage);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         } else {
             channel.basicNack(message.getMessageProperties().getDeliveryTag(), false, true);

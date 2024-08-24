@@ -2,7 +2,7 @@ package com.nagornov.multimicroserviceproject.authservice.config.security.jwt;
 
 import com.nagornov.multimicroserviceproject.authservice.repository.JwtRepository;
 import com.nagornov.multimicroserviceproject.authservice.service.SessionService;
-import com.nagornov.multimicroserviceproject.authservice.util.JwtUtil;
+import com.nagornov.multimicroserviceproject.authservice.util.JwtUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,27 +33,47 @@ public class JwtFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc)
             throws IOException, ServletException {
-        final String token = getTokenFromRequest((HttpServletRequest) request);
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        String token = getTokenFromRequest(httpRequest);
         String requestUri = httpRequest.getRequestURI();
 
         if (token != null && jwtRepository.validateAccessToken(token)) {
-
-            if (!sessionSkippedRequestUri().contains(requestUri)) {
-                if (!sessionService.hasByAccessToken(token)) {
-                    httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    return;
-                }
-            }
-
-            final Claims claims = jwtRepository.getAccessClaims(token);
-            final JwtAuthentication jwtInfoToken = JwtUtil.generate(claims);
-            jwtInfoToken.setAuthenticated(true);
-            SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
+            accessTokenFilter(token, requestUri, httpResponse);
+        } else if (token != null && jwtRepository.validateRefreshToken(token)) {
+            refreshTokenFilter(token, requestUri, httpResponse);
         }
         fc.doFilter(request, response);
+    }
+
+    private void accessTokenFilter(String token, String requestUri, HttpServletResponse httpResponse) {
+        if (!sessionSkippedRequestUri().contains(requestUri)) {
+            if (!sessionService.hasByAccessToken(token)) {
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        }
+
+        final Claims claims = jwtRepository.getAccessClaims(token);
+        final JwtAuthentication jwtInfoToken = JwtUtils.generateAccessInfo(claims);
+        jwtInfoToken.setAuthenticated(true);
+        SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
+    }
+
+    private void refreshTokenFilter(String token, String requestUri, HttpServletResponse httpResponse) {
+        if (!sessionSkippedRequestUri().contains(requestUri)) {
+            if (!sessionService.hasByRefreshToken(token)) {
+                httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        }
+
+        final Claims claims = jwtRepository.getRefreshClaims(token);
+        final JwtAuthentication jwtInfoToken = JwtUtils.generateRefreshInfo(claims);
+        jwtInfoToken.setAuthenticated(true);
+        SecurityContextHolder.getContext().setAuthentication(jwtInfoToken);
     }
 
     private List<String> sessionSkippedRequestUri() {

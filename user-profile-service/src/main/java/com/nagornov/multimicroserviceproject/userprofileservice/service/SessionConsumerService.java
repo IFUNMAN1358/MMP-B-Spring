@@ -1,5 +1,6 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.service;
 
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.rabbit.SessionMessage;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.Session;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,16 +11,15 @@ public class SessionConsumerService {
 
     private final SessionService sessionService;
 
-    public void distributor(String session, String operation) {
-        Session s = Session.fromString(session);
+    public void distributor(SessionMessage message) {
 
-         switch (operation) {
-            case "logout" -> logout(s);
+         switch (message.getOperation()) {
+            case "logout" -> logout(message.getSession());
         };
     }
 
-    private void logout(Session s) {
-        sessionService.deleteSession(s);
+    private void logout(Session session) {
+        sessionService.deleteSession(session);
     }
 
 }

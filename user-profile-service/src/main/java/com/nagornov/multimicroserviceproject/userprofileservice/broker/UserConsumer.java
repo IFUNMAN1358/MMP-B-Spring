@@ -1,35 +1,28 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.broker;
 
+import com.nagornov.multimicroserviceproject.userprofileservice.config.properties.RabbitProperties;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.rabbit.UserMessage;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.User;
 import com.nagornov.multimicroserviceproject.userprofileservice.service.UserConsumerService;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Service;
-
-import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
 public class UserConsumer {
 
     private final UserConsumerService userConsumerService;
+    private final RabbitProperties rabbitProperties;
 
-    @Bean
-    public Function<Message<String>, Message<String>> processUserRequest() {
-        return message -> {
-            String payload = message.getPayload();
-            String[] parts = payload.split(":", 3);
+    @RabbitListener(queues = "#{rabbitProperties.getUserRequestQueue()}")
+    @SendTo("#{rabbitProperties.getUserResponseQueue()}")
+    public String receiveMessage(String message) {
 
-            String messageId = parts[0];
-            String operation = parts[1];
-            String user = parts[2];
+        UserMessage userMessage = UserMessage.fromString(message);
+        User user = userConsumerService.distributor(userMessage);
 
-            User u = userConsumerService.distributor(user, operation);
-
-            String response = "%s:%s:%s".formatted(messageId, operation, u);
-            return MessageBuilder.withPayload(response).build();
-        };
+        return user.toString();
     }
 }

@@ -1,8 +1,6 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.nagornov.multimicroserviceproject.userprofileservice.util.JsonUtils;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,23 +21,11 @@ public class Session {
 
     @Override
     public String toString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting Session to JSON string", e);
-        }
+        return JsonUtils.toJsonString(this);
     }
 
     public static Session fromString(String str) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        try {
-            return objectMapper.readValue(str, Session.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error converting JSON string to Session", e);
-        }
+        return JsonUtils.fromJsonString(str, Session.class);
     }
 
 }

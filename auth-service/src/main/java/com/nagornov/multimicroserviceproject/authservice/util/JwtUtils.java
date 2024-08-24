@@ -5,7 +5,6 @@ import com.nagornov.multimicroserviceproject.authservice.model.Role;
 import io.jsonwebtoken.Claims;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.experimental.UtilityClass;
 
 import java.util.List;
 import java.util.Map;
@@ -13,11 +12,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class JwtUtil {
+public final class JwtUtils {
 
-    public static JwtAuthentication generate(Claims claims) {
+    public static JwtAuthentication generateAccessInfo(Claims claims) {
         final JwtAuthentication jwtInfoToken = new JwtAuthentication();
         jwtInfoToken.setRoles(getRoles(claims));
+        jwtInfoToken.setUserId(claims.getSubject());
+        return jwtInfoToken;
+    }
+
+    public static JwtAuthentication generateRefreshInfo(Claims claims) {
+        final JwtAuthentication jwtInfoToken = new JwtAuthentication();
         jwtInfoToken.setUserId(claims.getSubject());
         return jwtInfoToken;
     }

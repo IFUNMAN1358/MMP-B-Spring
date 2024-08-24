@@ -97,4 +97,8 @@ public class SessionService {
     public Boolean hasByAccessToken(String accessToken) {
         return sessionRepository.existsByAccessToken(accessToken);
     }
+
+    public Boolean hasByRefreshToken(String refreshToken) {
+        return sessionRepository.existsByRefreshToken(refreshToken);
+    }
 }
