@@ -1,10 +1,12 @@
 package com.nagornov.multimicroserviceproject.authservice.util;
 
-import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.JwtAuthentication;
+import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtAuthentication;
 import com.nagornov.multimicroserviceproject.authservice.model.Role;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,14 @@ public final class JwtUtils {
         return roles.stream()
                 .map(roleMap -> new Role(roleMap.get("authority")))
                 .collect(Collectors.toSet());
+    }
+
+    public static String getTokenFromRequest(HttpServletRequest request) {
+        final String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 
 }

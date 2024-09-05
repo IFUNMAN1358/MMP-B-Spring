@@ -1,41 +1,52 @@
+########################################################################################################################
 # SERVICE
-service.name=AuthService
 spring.application.name=auth-service
+service.name=AuthService
+general.domain=test.localhost
+# Server
+server.subdomain=app.auth
 server.port=8000
-frontend.base-url=http://auth.localhost:7000
-
-# OTHER SERVICES
-user-profile-service.backend.url=http://localhost:8010
-
+# Front
+front.subdomain=auth
+front.port=7000
+# Development
+service.back-url=http://${server.subdomain}.${general.domain}:${server.port}
+service.front-url=http://${front.subdomain}.${general.domain}:${front.port}
+########################################################################################################################
+# CLIENT
+client.user.name=UserService
+client.user.subdomain=app.user
+client.user.port=8010
+client.user.back-url=http://${client.user.subdomain}.${general.domain}:${client.user.port}
+########################################################################################################################
 # HTTPS
 #server.ssl.key-store=classpath:keystore.p12
-#server.ssl.key-store-password=password
+#server.ssl.key-store-password=
 #server.ssl.key-store-type=PKCS12
 #server.ssl.key-alias=tomcat
-
+########################################################################################################################
 # SPRING JPA
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
-
 # POSTGRES
 spring.datasource.url=jdbc:postgresql://localhost:5432/auth_db
 spring.datasource.username=postgres
-spring.datasource.password=password
+spring.datasource.password=
 spring.datasource.driver-class-name=org.postgresql.Driver
-
+########################################################################################################################
 # REDIS
 spring.data.redis.host=localhost
 spring.data.redis.port=6379
-
-################################################################################
+#spring.data.redis.password=
+########################################################################################################################
 # RABBITMQ
 # general
 spring.rabbitmq.stream.host=localhost
 spring.rabbitmq.stream.port=5672
-spring.rabbitmq.stream.username=guest
-spring.rabbitmq.stream.password=guest
+spring.rabbitmq.stream.username=
+spring.rabbitmq.stream.password=
 spring.rabbitmq.connection-timeout=5000
 spring.rabbitmq.requested-heartbeat=10
 # template
@@ -55,20 +66,28 @@ spring.rabbitmq.user.request.routing-key=user-request-routing-key
 spring.rabbitmq.user.response.routing-key=user-response-routing-key
 
 spring.rabbitmq.session.request.queue=session-request-queue
-################################################################################
-
-# JWT
-jwt.secret.access=secret
-jwt.secret.refresh=secret
+########################################################################################################################
+# SECURITY
+# jwt
+jwt.secret.access=
+jwt.secret.refresh=
 jwt.access.expire.minutes=10
 jwt.refresh.expire.days=10
-
+# csrf
+csrf.header-name=X-XSRF-TOKEN
+csrf.cookie.name=XSRF-TOKEN
+csrf.cookie.domain=${general.domain}
+csrf.cookie.path=/
+csrf.cookie.http-only=true
+csrf.cookie.secure=true
+csrf.cookie.same-site=None
+########################################################################################################################
 # TWILIO
-twilio.accountSid=sid
-twilio.authToken=authtoken
-twilio.verifyServiceSid=vsid
-twilio.phoneNumber=fromPhoneNumber
-
+twilio.accountSid=
+twilio.authToken=
+twilio.verifyServiceSid=
+twilio.phoneNumber=
+########################################################################################################################
 # SMTP
 spring.mail.protocol=smtp
 spring.mail.host=smtp.gmail.com
@@ -81,35 +100,34 @@ spring.mail.properties.mail.smtp.debug=true
 spring.mail.properties.mail.smtp.connectiontimeout=5000
 spring.mail.properties.mail.smtp.timeout=5000
 spring.mail.properties.mail.smtp.writetimeout=5000
-
+########################################################################################################################
 # OAUTH 2 GOOGLE
 spring.security.oauth2.client.registration.google.client-id=
 spring.security.oauth2.client.registration.google.client-secret=
 spring.security.oauth2.client.registration.google.scope=openid, profile, email
-spring.security.oauth2.client.registration.google.redirect-uri=${frontend.base-url}/oauth/google/redirect
+spring.security.oauth2.client.registration.google.redirect-uri=${service.front-url}/oauth/google/redirect
 spring.security.oauth2.client.registration.google.authorization-grant-type=authorization_code
 spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth
 spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
 spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
 spring.security.oauth2.client.provider.google.jwk-set-uri=https://www.googleapis.com/oauth2/v3/certs
-
 # OAUTH 2 FACEBOOK
 spring.security.oauth2.client.registration.facebook.client-id=
 spring.security.oauth2.client.registration.facebook.client-secret=
 spring.security.oauth2.client.registration.facebook.scope=public_profile, email
-spring.security.oauth2.client.registration.facebook.redirect-uri=${frontend.base-url}/oauth/facebook/redirect
+spring.security.oauth2.client.registration.facebook.redirect-uri=${service.front-url}/oauth/facebook/redirect
 spring.security.oauth2.client.registration.facebook.authorization-grant-type=authorization_code
 spring.security.oauth2.client.provider.facebook.authorization-uri=https://www.facebook.com/v20.0/dialog/oauth
 spring.security.oauth2.client.provider.facebook.token-uri=https://graph.facebook.com/v20.0/oauth/access_token
 spring.security.oauth2.client.provider.facebook.user-info-uri=https://graph.facebook.com/me?fields=id,name,email
 spring.security.oauth2.client.provider.facebook.user-name-attribute=id
-
 # OAUTH 2 YANDEX
 spring.security.oauth2.client.registration.yandex.client-id=
 spring.security.oauth2.client.registration.yandex.client-secret=
-spring.security.oauth2.client.registration.yandex.redirect-uri=${frontend.base-url}/oauth/yandex/redirect
+spring.security.oauth2.client.registration.yandex.redirect-uri=${service.front-url}/oauth/yandex/redirect
 spring.security.oauth2.client.registration.yandex.authorization-grant-type=authorization_code
 spring.security.oauth2.client.provider.yandex.authorization-uri=https://oauth.yandex.com/authorize
 spring.security.oauth2.client.provider.yandex.token-uri=https://oauth.yandex.com/token
 spring.security.oauth2.client.provider.yandex.user-info-uri=https://login.yandex.ru/info
 spring.security.oauth2.client.provider.yandex.jwk-set-uri=https://login.yandex.ru/keys
+########################################################################################################################

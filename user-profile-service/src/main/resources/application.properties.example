@@ -1,34 +1,48 @@
+########################################################################################################################
 # SERVICE
-service.name=UserProfileService
 spring.application.name=user-profile-service
+service.name=UserService
+general.domain=test.localhost
+# Server
+server.subdomain=app.user
 server.port=8010
-frontend.base-url=http://user.localhost:7010
-
+# Front
+front.subdomain=user
+front.port=7010
+# Development
+service.back-url=http://${server.subdomain}.${general.domain}:${server.port}
+service.front-url=http://${front.subdomain}.${general.domain}:${front.port}
+########################################################################################################################
+# FEIGN CLIENT
+feign-client.auth.name=AuthService
+feign-client.auth.subdomain=app.auth
+feign-client.auth.port=8000
+feign-client.auth.url=http://${feign-client.auth.subdomain}.${general.domain}:${feign-client.auth.port}
+########################################################################################################################
 # HTTPS
 #server.ssl.key-store=classpath:keystore.p12
-#server.ssl.key-store-password=password
+#server.ssl.key-store-password=
 #server.ssl.key-store-type=PKCS12
 #server.ssl.key-alias=tomcat
-
+########################################################################################################################
 # SPRING JPA
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
-
+########################################################################################################################
 # POSTGRES
 spring.datasource.url=jdbc:postgresql://localhost:5432/user_profile_db
 spring.datasource.username=postgres
-spring.datasource.password=password
+spring.datasource.password=
 spring.datasource.driver-class-name=org.postgresql.Driver
-
-################################################################################
+########################################################################################################################
 # RABBITMQ
 # general
 spring.rabbitmq.stream.host=localhost
 spring.rabbitmq.stream.port=5672
-spring.rabbitmq.stream.username=guest
-spring.rabbitmq.stream.password=guest
+spring.rabbitmq.stream.username=
+spring.rabbitmq.stream.password=
 spring.rabbitmq.connection-timeout=5000
 spring.rabbitmq.requested-heartbeat=10
 # template
@@ -48,7 +62,17 @@ spring.rabbitmq.user.request.routing-key=user-request-routing-key
 spring.rabbitmq.user.response.routing-key=user-response-routing-key
 
 spring.rabbitmq.session.request.queue=session-request-queue
-################################################################################
-
-# JWT
-jwt.secret.access=copy secret from authorization service
+########################################################################################################################
+# SECURITY
+# jwt
+jwt.secret.access=copy from authservice
+jwt.secret.refresh=copy from authservice
+# csrf
+csrf.header-name=X-XSRF-TOKEN
+csrf.cookie.name=XSRF-TOKEN
+csrf.cookie.domain=${general.domain}
+csrf.cookie.path=/
+csrf.cookie.http-only=true
+csrf.cookie.secure=true
+csrf.cookie.same-site=None
+########################################################################################################################

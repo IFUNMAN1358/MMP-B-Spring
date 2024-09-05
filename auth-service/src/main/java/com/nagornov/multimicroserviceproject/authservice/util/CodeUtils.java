@@ -15,7 +15,6 @@ public class CodeUtils {
     private final String digits = "123456789";
     private final String letters = "ABCDEFGHIJKLMNPQRSTUVWXYZ";
 
-
     public static String generateRandomCodeDigit(Integer digitCount) {
         return generateRandomCharacters(digitCount);
     }
@@ -23,7 +22,6 @@ public class CodeUtils {
     public static String generateRandomCodeDigitChars(Integer digitCount, Integer letterCount) {
         return generateMixedCode(digitCount, letterCount);
     }
-
 
     private String generateRandomCharacters(int length) {
         StringBuilder code = new StringBuilder(length);

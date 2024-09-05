@@ -23,29 +23,33 @@ public class Session {
     @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
 
+    @Column(name = "service_name", nullable = false, updatable = false)
+    private String serviceName;
+
     @Column(name = "access_token", length = 400, nullable = false)
     private String accessToken;
 
     @Column(name = "refresh_token", nullable = false, updatable = false)
     private String refreshToken;
 
-    @Column(name = "device", nullable = false, updatable = false)
-    private String device;
+    @Column(name = "device_name", nullable = false, updatable = false)
+    private String deviceName;
 
-    @Column(name = "service", nullable = false, updatable = false)
-    private String service;
-
-    @Column(name = "os", nullable = false)
-    private String os;
+    @Column(name = "device_os", nullable = false)
+    private String deviceOs;
 
     @Column(name = "location", nullable = false)
     private String location;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column(name = "last_activity", nullable = false)
     private LocalDateTime lastActivity;
 
     @PrePersist
     private void onCreate() {
+        this.createdAt = LocalDateTime.now();
         this.lastActivity = LocalDateTime.now();
     }
 

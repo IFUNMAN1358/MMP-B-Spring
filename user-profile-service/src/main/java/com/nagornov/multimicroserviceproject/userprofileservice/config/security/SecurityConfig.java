@@ -1,6 +1,10 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.config.security;
 
-import com.nagornov.multimicroserviceproject.userprofileservice.config.security.jwt.JwtFilter;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.exception.CustomAccessDeniedHandler;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.exception.CustomAuthenticationEntryPoint;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.filter.CustomCorsFilter;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.filter.CustomCsrfFilter;
+import com.nagornov.multimicroserviceproject.userprofileservice.config.security.filter.CustomJwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,8 +15,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.session.SessionManagementFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -21,15 +25,20 @@ import org.springframework.security.web.session.SessionManagementFilter;
 public class SecurityConfig {
 
     private final CustomCorsFilter corsFilter;
-    private final JwtFilter jwtFilter;
+    private final CustomCsrfFilter csrfFilter;
+    private final CustomJwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
           http
             .httpBasic(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(corsFilter, SessionManagementFilter.class)
+
+            .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
+            .addFilterBefore(csrfFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(auth -> auth
 
                     // TEST
@@ -44,7 +53,10 @@ public class SecurityConfig {
 
                     .anyRequest().authenticated()
             )
-            .addFilterAfter(jwtFilter, UsernamePasswordAuthenticationFilter.class);;
+            .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler())
+            );
         return http.build();
     }
 

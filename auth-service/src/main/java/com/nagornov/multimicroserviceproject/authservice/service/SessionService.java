@@ -1,13 +1,17 @@
 package com.nagornov.multimicroserviceproject.authservice.service;
 
+import com.nagornov.multimicroserviceproject.authservice.config.properties.ClientProperties;
+import com.nagornov.multimicroserviceproject.authservice.config.properties.ServiceProperties;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.DeleteSessionRequest;
 import com.nagornov.multimicroserviceproject.authservice.dto.session.SessionRequest;
+import com.nagornov.multimicroserviceproject.authservice.exception.session.IncorrectServiceNameException;
+import com.nagornov.multimicroserviceproject.authservice.exception.session.SessionNotFoundException;
+import com.nagornov.multimicroserviceproject.authservice.exception.user.UserNotFoundException;
 import com.nagornov.multimicroserviceproject.authservice.mapper.SessionMapper;
 import com.nagornov.multimicroserviceproject.authservice.model.Session;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.repository.JwtRepository;
 import com.nagornov.multimicroserviceproject.authservice.repository.SessionRepository;
-import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,6 +25,9 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SessionService {
 
+    private final ServiceProperties serviceProperties;
+    private final ClientProperties clientProperties;
+
     private final UserSenderService userSenderService;
     private final SessionRepository sessionRepository;
     private final JwtRepository jwtRepository;
@@ -28,54 +35,16 @@ public class SessionService {
     private final SessionMapper sessionMapper;
     private final SessionSenderService sessionSenderService;
 
-    @Transactional
-    public void createSession(SessionRequest req) {
-        try {
-            if (sessionRepository.existsByServiceAndUserIdAndDevice(req.getService(), req.getUserId(), req.getDevice())) {
-                Session existingSession = sessionRepository.getSessionByServiceAndUserIdAndDevice(req.getService(), req.getUserId(), req.getDevice());
-                sessionRepository.delete(existingSession);
-            }
-            Session session = sessionMapper.toSession(req);
-            sessionRepository.save(session);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create session", e);
+    public Session getSession(String userId, String serviceName) throws SessionNotFoundException, IncorrectServiceNameException {
+        if (!clientProperties.clientsNameList().contains(serviceName)) {
+            throw new IncorrectServiceNameException();
         }
-    }
 
-    @Transactional
-    public Session updateSession(SessionRequest req) throws Exception {
-        try {
-            if (!jwtRepository.validateRefreshToken(req.getRefreshToken())) {
-                sessionRepository.deleteSessionByRefreshToken(req.getRefreshToken());
-                return null;
-            }
-
-            Claims claims = jwtRepository.getRefreshClaims(req.getRefreshToken());
-            String userId = claims.getSubject();
-
-            Session session = sessionRepository.getSessionByUserIdAndRefreshToken(UUID.fromString(userId), req.getRefreshToken());
-            if (session == null) {
-                throw new Exception("Session not found");
-            }
-
-            User user = new User();
-            user.setUserId(session.getUserId());
-            Optional<User> userFromService = userSenderService.getUser(user);
-
-            String accessToken = jwtRepository.generateAccessToken(userFromService.get());
-            session.setAccessToken(accessToken);
-            session.setOs(req.getOs());
-            session.setLocation(req.getLocation());
-            sessionRepository.save(session);
-
-            return session;
-        } catch (Exception e) {
-            throw new Exception("Failed to update session", e);
+        Optional<Session> optSession = sessionRepository.findByUserIdAndServiceName(UUID.fromString(userId), serviceName);
+        if (optSession.isEmpty()) {
+            throw new SessionNotFoundException();
         }
-    }
-
-    public Session getSession(String refreshToken) {
-        return sessionRepository.getSessionByRefreshToken(refreshToken);
+        return optSession.get();
     }
 
     public List<Session> getSessions(String userId) {
@@ -83,22 +52,54 @@ public class SessionService {
     }
 
     @Transactional
+    public void createSession(String userId, SessionRequest req) {
+        Session session = sessionMapper.toSession(req);
+        session.setUserId(UUID.fromString(userId));
+
+        if (session.getServiceName().equals(serviceProperties.getServiceName()) || clientProperties.clientsNameList().contains(session.getServiceName())) {
+            Optional<Session> optSession =
+                    sessionRepository.findByServiceNameAndUserIdAndDeviceName(session.getServiceName(), session.getUserId(), session.getDeviceName());
+
+            optSession.ifPresent(sessionRepository::delete);
+            sessionRepository.save(session);
+        }
+    }
+
+    @Transactional
+    public Session updateSession(String userId, SessionRequest req) throws SessionNotFoundException, UserNotFoundException {
+
+        Session session = sessionMapper.toSession(req);
+        session.setUserId(UUID.fromString(userId));
+
+        Optional<Session> optSession =
+                sessionRepository.findByServiceNameAndUserIdAndDeviceName(session.getServiceName(), session.getUserId(), session.getDeviceName());
+        if (optSession.isEmpty()) {
+            throw new SessionNotFoundException();
+        }
+        Session existedSession = optSession.get();
+
+        Optional<User> optUser = userSenderService.getUser(new User(existedSession.getUserId()));
+        if (optUser.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+
+        String newAccessToken = jwtRepository.generateAccessToken(optUser.get());
+        existedSession.setAccessToken(newAccessToken);
+        sessionRepository.save(existedSession);
+
+        return existedSession;
+    }
+
+    @Transactional
     public void deleteSession(DeleteSessionRequest req, String userId) {
         Session session = sessionRepository.getSessionBySessionIdAndUserId(req.getSessionId(), UUID.fromString(userId));
 
-        if (session.getService().equals("AuthService")) {
+        if (session.getServiceName().equals(serviceProperties.getServiceName())) {
             messagingTemplate.convertAndSend("/session", session);
         } else {
-            sessionSenderService.logout(session.getService(), session);
+            sessionSenderService.logout(session.getServiceName(), session);
         }
         sessionRepository.delete(session);
     }
 
-    public Boolean hasByAccessToken(String accessToken) {
-        return sessionRepository.existsByAccessToken(accessToken);
-    }
-
-    public Boolean hasByRefreshToken(String refreshToken) {
-        return sessionRepository.existsByRefreshToken(refreshToken);
-    }
 }

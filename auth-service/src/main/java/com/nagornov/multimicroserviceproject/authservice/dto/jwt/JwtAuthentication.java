@@ -1,6 +1,6 @@
-package com.nagornov.multimicroserviceproject.userprofileservice.config.security.jwt;
+package com.nagornov.multimicroserviceproject.authservice.dto.jwt;
 
-import com.nagornov.multimicroserviceproject.userprofileservice.model.Role;
+import com.nagornov.multimicroserviceproject.authservice.model.Role;
 import lombok.Data;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

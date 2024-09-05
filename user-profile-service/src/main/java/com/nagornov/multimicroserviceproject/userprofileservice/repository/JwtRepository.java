@@ -1,35 +1,37 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.repository;
 
+import com.nagornov.multimicroserviceproject.userprofileservice.util.CustomLogger;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 
-@Slf4j
 @Component
 public class JwtRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtRepository.class);
-
     private final SecretKey jwtAccessSecret;
+    private final SecretKey jwtRefreshSecret;
 
     public JwtRepository(
-        @Value("${jwt.secret.access}") String jwtAccessSecret
+        @Value("${jwt.secret.access}") String jwtAccessSecret,
+        @Value("${jwt.secret.refresh}") String jwtRefreshSecret
     ) {
         this.jwtAccessSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtAccessSecret));
+        this.jwtRefreshSecret = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtRefreshSecret));
     }
 
     public boolean validateAccessToken(@NonNull String accessToken) {
         return validateToken(accessToken, jwtAccessSecret);
+    }
+
+    public boolean validateRefreshToken(@NonNull String refreshToken) {
+        return validateToken(refreshToken, jwtRefreshSecret);
     }
 
     private boolean validateToken(@NonNull String token, @NonNull Key secret) {
@@ -40,21 +42,25 @@ public class JwtRepository {
                     .parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException expEx) {
-            logger.error("Token expired", expEx);
+            CustomLogger.error("Token expired");
         } catch (UnsupportedJwtException unsEx) {
-            logger.error("Unsupported jwt", unsEx);
+            CustomLogger.error("Unsupported jwt");
         } catch (MalformedJwtException mjEx) {
-            logger.error("Malformed jwt", mjEx);
+            CustomLogger.error("Malformed jwt");
         } catch (SignatureException sEx) {
-            logger.error("Invalid signature", sEx);
+            CustomLogger.error("Invalid signature");
         } catch (Exception e) {
-            logger.error("invalid token", e);
+            CustomLogger.error("invalid token");
         }
         return false;
     }
 
     public Claims getAccessClaims(@NonNull String token) {
         return getClaims(token, jwtAccessSecret);
+    }
+
+    public Claims getRefreshClaims(@NonNull String token) {
+        return getClaims(token, jwtRefreshSecret);
     }
 
     private Claims getClaims(@NonNull String token, @NonNull Key secret) {

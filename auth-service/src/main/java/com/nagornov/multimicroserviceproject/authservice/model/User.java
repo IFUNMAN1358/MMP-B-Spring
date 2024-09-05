@@ -29,6 +29,8 @@ public class User {
         new Role("ROLE_UNREGISTERED")
     );
 
+    public User(UUID userId) {this.userId = userId;}
+
     public Map<Object, Object> toMap() {
         Map<Object, Object> map = new HashMap<>();
         map.put("userId", this.userId);

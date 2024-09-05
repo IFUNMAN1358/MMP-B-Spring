@@ -1,11 +1,12 @@
 package com.nagornov.multimicroserviceproject.userprofileservice.util;
 
-import com.nagornov.multimicroserviceproject.userprofileservice.config.security.jwt.JwtAuthentication;
+import com.nagornov.multimicroserviceproject.userprofileservice.dto.jwt.JwtAuthentication;
 import com.nagornov.multimicroserviceproject.userprofileservice.model.Role;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import lombok.experimental.UtilityClass;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,17 @@ import java.util.stream.Collectors;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public final class JwtUtil {
+public final class JwtUtils {
 
-    public static JwtAuthentication generate(Claims claims) {
+    public static JwtAuthentication generateAccessInfo(Claims claims) {
         final JwtAuthentication jwtInfoToken = new JwtAuthentication();
         jwtInfoToken.setRoles(getRoles(claims));
+        jwtInfoToken.setUserId(claims.getSubject());
+        return jwtInfoToken;
+    }
+
+    public static JwtAuthentication generateRefreshInfo(Claims claims) {
+        final JwtAuthentication jwtInfoToken = new JwtAuthentication();
         jwtInfoToken.setUserId(claims.getSubject());
         return jwtInfoToken;
     }
@@ -28,6 +35,14 @@ public final class JwtUtil {
         return roles.stream()
                 .map(roleMap -> new Role(roleMap.get("authority")))
                 .collect(Collectors.toSet());
+    }
+
+    public static String getTokenFromRequest(HttpServletRequest request) {
+        final String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
+        }
+        return null;
     }
 
 }

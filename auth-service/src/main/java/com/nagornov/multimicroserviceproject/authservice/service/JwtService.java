@@ -1,6 +1,6 @@
 package com.nagornov.multimicroserviceproject.authservice.service;
 
-import com.nagornov.multimicroserviceproject.authservice.config.security.jwt.JwtAuthentication;
+import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtAuthentication;
 import com.nagornov.multimicroserviceproject.authservice.dto.jwt.JwtResponse;
 import com.nagornov.multimicroserviceproject.authservice.model.User;
 import com.nagornov.multimicroserviceproject.authservice.repository.JwtRepository;

@@ -5,17 +5,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
-    Boolean existsByServiceAndUserIdAndDevice(String service, UUID userId, String device);
-    Boolean existsByAccessToken(String token);
-    Boolean existsByRefreshToken(String token);
+    Optional<Session> findByServiceNameAndUserIdAndDeviceName(String service, UUID userId, String device);
+    Optional<Session> findByUserIdAndServiceName(UUID userId, String serviceName);
 
-    Session getSessionByServiceAndUserIdAndDevice(String service, UUID userId, String device);
-    Session getSessionByUserIdAndRefreshToken(UUID userId, String token);
+    Boolean existsByAccessToken(String token);
+
     Session getSessionBySessionIdAndUserId(Long sessionId, UUID userId);
 
     Session getSessionByRefreshToken(String refreshToken);

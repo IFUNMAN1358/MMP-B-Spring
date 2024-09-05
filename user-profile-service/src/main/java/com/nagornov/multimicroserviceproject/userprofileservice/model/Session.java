@@ -11,12 +11,13 @@ public class Session {
 
     private Long sessionId;
     private UUID userId;
+    private String serviceName;
     private String accessToken;
     private String refreshToken;
-    private String device;
-    private String service;
-    private String os;
+    private String deviceName;
+    private String deviceOs;
     private String location;
+    private LocalDateTime createdAt;
     private LocalDateTime lastActivity;
 
     @Override
